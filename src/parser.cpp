@@ -1,0 +1,64 @@
+#include "parser.hpp"
+#include <fstream>
+#include <sstream>
+#include <iostream>
+
+using namespace std;
+
+vector<string> split(const string& line) {
+    vector<string> tokens;
+    string token;
+    stringstream ss(line);
+
+    while (getline(ss, token, ',')) {
+        tokens.push_back(token);
+    }
+
+    return tokens;
+}
+
+ParseResult parseCSV(const string& filename) {
+    ifstream file(filename);
+    ParseResult result;
+    result.totalRegisters = 0;
+    result.totalChargesNulls = 0;
+
+    if (!file.is_open()) {
+        cerr << "Error abriendo el archivo\n";
+        return result;
+    }
+
+    string line;
+
+    getline(file, line); //Saltar titulos
+
+    while (getline(file, line)) {
+        vector<string> cols = split(line);
+
+        // Validación básica
+        if (cols.size() < 21) continue;
+
+        Solicitud s;
+
+        s.customerID = cols[0];
+        s.tenure = stoi(cols[5]);
+        s.monthlyCharges = stod(cols[18]);
+
+        if (cols[19].empty() || cols[19] == " " || s.tenure == 0) {
+            s.totalCharges = 0.0;
+            result.totalChargesNulls++;
+        } else {
+            s.totalCharges = stod(cols[19]);
+        }
+
+        string churnStr = cols[20];
+	churnStr.erase(remove(churnStr.begin(), churnStr.end(), '\r'), churnStr.end());
+	s.churn = (churnStr == "Yes");
+
+        result.solicitudes.push_back(s);
+        result.totalRegisters++;
+    }
+
+    file.close();
+    return result;
+}
