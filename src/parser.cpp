@@ -62,3 +62,24 @@ ParseResult parseCSV(const string& filename) {
     file.close();
     return result;
 }
+
+void writeCSV(const string& filename, const vector<Solicitud>& solicitudes) {
+    ofstream file(filename);
+
+    if (!file.is_open()) {
+        cerr << "Error creando el archivo\n";
+        return;
+    }
+
+    file << "customerID,tenure,MonthlyCharges,TotalCharges,Churn\n";
+    for (const auto& s : solicitudes) {
+        file << s.customerID << ","
+             << s.tenure << ","
+             << s.monthlyCharges << ","
+             << s.totalCharges << ","
+             << (s.churn ? "Yes" : "No")
+             << "\n";
+    }
+
+    file.close();
+}

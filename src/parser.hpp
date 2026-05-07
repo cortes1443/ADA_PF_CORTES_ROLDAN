@@ -20,4 +20,6 @@ struct ParseResult {
 
 ParseResult parseCSV(const std::string& filename);
 
+void writeCSV(const std::string& filename, const std::vector<Solicitud>& solicitudes);
+
 #endif
