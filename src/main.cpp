@@ -8,6 +8,7 @@
 
 #include "graph.hpp"
 #include "kruskal.hpp"
+#include "knapsack.hpp"
 
 using namespace std;
 
@@ -24,13 +25,13 @@ int main() {
         "data/WA_Fn-UseC_-Telco-Customer-Churn.csv"
     );
 
-    cout << "Registros cargados: "
-         << res.totalRegistros
-         << endl;
+        cout << "Registros cargados: "
+            << res.totalRegisters
+            << endl;
 
-    cout << "TotalCharges nulos: "
-         << res.totalChargesNulos
-         << endl;
+        cout << "TotalCharges nulos: "
+            << res.totalChargesNulls
+            << endl;
 
     //ordenar por tenure descendente
 
@@ -147,9 +148,31 @@ int main() {
     cout << "MST exportado." << endl;
 
     //MODULO C
+    cout << "\n===== MODULO C =====" << endl;
 
-    cout << "\nPipeline completado correctamente."
-         << endl;
+    // Tomar las primeras 50 solicitudes activas (Churn == No) del arreglo ya ordenado por tenure
+    std::vector<Solicitud> itemsC;
+    for (const auto &s : res.solicitudes) {
+        if (!s.churn) {
+            itemsC.push_back(s);
+            if (itemsC.size() >= 50) break;
+        }
+    }
+
+    int W = 500;
+    KSResult ksres = solveKnapsackDP(itemsC, W);
+    auto greedy = greedyByRatio(itemsC, W);
+    std::vector<int> counterGreedy, counterOptimal;
+    bool found = findGreedyCounterexample3(itemsC, W, counterGreedy, counterOptimal);
+
+    // Escribir resultado final en results/asignacion_bw.txt
+    writeAssignmentReport("results/asignacion_bw.txt", ksres, itemsC, greedy, counterGreedy, counterOptimal, W);
+
+    cout << "Modulo C completado: valor_opt_centavos=" << ksres.totalValue
+         << " items_seleccionados=" << ksres.selectedIndices.size()
+         << " contraejemplo3=" << (found?"Si":"No") << endl;
+
+    cout << "\nPipeline completado correctamente." << endl;
 
     return 0;
 }
