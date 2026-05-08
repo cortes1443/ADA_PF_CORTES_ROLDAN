@@ -1,6 +1,9 @@
 #include "knapsack.hpp"
 #include <cmath>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <filesystem>
 
 using namespace std;
 
@@ -124,4 +127,69 @@ bool findGreedyCounterexample3(const vector<Solicitud>& items, int W,
         }
     }
     return false;
+}
+
+void writeAssignmentReport(const string& filename, const KSResult& res,
+                           const vector<Solicitud>& items,
+                           const vector<int>& greedySel,
+                           const vector<int>& counterGreedy,
+                           const vector<int>& counterOptimal,
+                           int W) {
+    filesystem::path path(filename);
+    if (path.has_parent_path()) {
+        filesystem::create_directories(path.parent_path());
+    }
+
+    ofstream out(filename);
+    if (!out.is_open()) {
+        cerr << "No se pudo crear " << filename << "\n";
+        return;
+    }
+
+    out << "Tabla PD (filas i=0..n, columnas w=0..W)\n";
+    int n = (int)res.dp.size() - 1;
+    for (int i = 0; i <= n; ++i) {
+        for (int w = 0; w <= W; ++w) {
+            out << res.dp[i][w];
+            if (w < W) out << ',';
+        }
+        out << '\n';
+    }
+
+    out << "\nSolucion optima (PD):\n";
+    out << "Valor total (en centavos): " << res.totalValue << "\n";
+    out << "Peso total usado: " << res.totalWeight << "\n";
+    out << "Numero solicitudes seleccionadas: " << res.selectedIndices.size() << "\n";
+    out << "CustomerIDs seleccionados:\n";
+    for (int idx : res.selectedIndices) {
+        out << items[idx].customerID << '\n';
+    }
+
+    out << "\nSeleccion voraz por ratio:\n";
+    for (int idx : greedySel) {
+        out << items[idx].customerID << ',';
+    }
+    out << '\n';
+
+    out << "\nContraejemplo codicioso (3 items):\n";
+    if (counterOptimal.empty()) {
+        out << "No se encontro contraejemplo de 3 items.\n";
+    } else {
+        out << "Greedy seleccion: ";
+        for (int idx : counterGreedy) {
+            out << items[idx].customerID << ',';
+        }
+        out << '\n';
+        out << "Optimo PD: ";
+        for (int idx : counterOptimal) {
+            out << items[idx].customerID << ',';
+        }
+        out << '\n';
+    }
+
+    out << "\nAnalisis de complejidad:\n";
+    out << "Tiempo: Theta(n * W) porque se llena una tabla de n filas por W columnas.\n";
+    out << "Espacio: Theta(n * W) porque se almacena la tabla completa dp.\n";
+
+    out.close();
 }
