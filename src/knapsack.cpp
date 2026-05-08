@@ -16,7 +16,7 @@ KSResult solveKnapsackDP(const vector<Solicitud>& items, int W) {
     KSResult res;
     res.dp.assign(n + 1, vector<int>(W + 1, 0));
 
-    // Construir tabla DP
+    // Construir tabla PD
     for (int i = 1; i <= n; ++i) {
         int wi, vi;
         toWeightValue(items[i-1], wi, vi);
@@ -32,6 +32,21 @@ KSResult solveKnapsackDP(const vector<Solicitud>& items, int W) {
     // Valor óptimo
     res.totalValue = res.dp[n][W];
     res.totalWeight = 0;
+
+    // Backtracking para reconstruir selección
+    int w = W;
+    res.totalWeight = 0;
+    for (int i = n; i >= 1; --i) {
+        if (res.dp[i][w] != res.dp[i-1][w]) {
+            // se tomó el item i-1
+            res.selectedIndices.push_back(i-1);
+            int wi, vi;
+            toWeightValue(items[i-1], wi, vi);
+            res.totalWeight += wi;
+            w -= wi;
+        }
+    }
+    reverse(res.selectedIndices.begin(), res.selectedIndices.end());
 
     return res;
 }
@@ -60,7 +75,7 @@ vector<int> greedyByRatio(const vector<Solicitud>& items, int W) {
     return sel;
 }
 
-// Helper: calcula valor total y peso de un conjunto de índices sobre items
+// calcula valor total y peso de un conjunto de índices sobre items
 static void computeSetStats(const vector<Solicitud>& items, const vector<int>& sel, int& totalW, int& totalV) {
     totalW = 0; totalV = 0;
     for (int idx : sel) {
