@@ -15,4 +15,11 @@ struct KSResult {
 // Resuelve la mochila 0-1 por programación dinámica. Devuelve la tabla DP y la solución.
 KSResult solveKnapsackDP(const std::vector<Solicitud>& items, int W);
 
+// Selección voraz por ratio (value/weight). Devuelve índices seleccionados.
+std::vector<int> greedyByRatio(const std::vector<Solicitud>& items, int W);
+
+// Busca un contraejemplo usando exactamente 3 ítems del conjunto: devuelve true si lo encuentra
+bool findGreedyCounterexample3(const std::vector<Solicitud>& items, int W,
+                               std::vector<int>& greedySel, std::vector<int>& optimalSel);
+
 #endif

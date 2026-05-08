@@ -35,3 +35,78 @@ KSResult solveKnapsackDP(const vector<Solicitud>& items, int W) {
 
     return res;
 }
+
+vector<int> greedyByRatio(const vector<Solicitud>& items, int W) {
+    int n = (int)items.size();
+    vector<pair<double,int>> order; order.reserve(n);
+    for (int i = 0; i < n; ++i) {
+        int wi, vi; toWeightValue(items[i], wi, vi);
+        double ratio = (wi == 0) ? (vi > 0 ? 1e9 : 0.0) : (double)vi / (double)wi;
+        order.emplace_back(-ratio, i); // negativo para ordenar descendente por ratio
+    }
+    sort(order.begin(), order.end());
+
+    vector<int> sel;
+    int used = 0;
+    for (auto &p : order) {
+        int idx = p.second;
+        int wi, vi; toWeightValue(items[idx], wi, vi);
+        if (used + wi <= W) {
+            sel.push_back(idx);
+            used += wi;
+        }
+    }
+    sort(sel.begin(), sel.end());
+    return sel;
+}
+
+// Helper: calcula valor total y peso de un conjunto de índices sobre items
+static void computeSetStats(const vector<Solicitud>& items, const vector<int>& sel, int& totalW, int& totalV) {
+    totalW = 0; totalV = 0;
+    for (int idx : sel) {
+        int wi, vi; toWeightValue(items[idx], wi, vi);
+        totalW += wi;
+        totalV += vi;
+    }
+}
+
+// Evalúa PD exacta para un subconjunto de items
+static pair<vector<int>,int> exactOnSubset(const vector<Solicitud>& subset, int W) {
+    KSResult r = solveKnapsackDP(subset, W);
+    return {r.selectedIndices, r.totalValue};
+}
+
+bool findGreedyCounterexample3(const vector<Solicitud>& items, int W,
+                               vector<int>& greedySel, vector<int>& optimalSel) {
+    int n = (int)items.size();
+    // iterar combinaciones de 3 índices
+    for (int a = 0; a < n; ++a) {
+        for (int b = a+1; b < n; ++b) {
+            for (int c = b+1; c < n; ++c) {
+                vector<Solicitud> subset = {items[a], items[b], items[c]};
+                // greedy sobre subset
+                vector<int> localGreedy = greedyByRatio(subset, W);
+                int gW, gV; computeSetStats(subset, localGreedy, gW, gV);
+                auto [optSelLocal, optV] = exactOnSubset(subset, W);
+                if (gV != optV) {
+                    // traducir índices locales a globales
+                    greedySel.clear(); optimalSel.clear();
+                    for (int idx : localGreedy) {
+                        if (idx == 0) greedySel.push_back(a);
+                        else if (idx == 1) greedySel.push_back(b);
+                        else greedySel.push_back(c);
+                    }
+                    for (int idx : optSelLocal) {
+                        if (idx == 0) optimalSel.push_back(a);
+                        else if (idx == 1) optimalSel.push_back(b);
+                        else optimalSel.push_back(c);
+                    }
+                    sort(greedySel.begin(), greedySel.end());
+                    sort(optimalSel.begin(), optimalSel.end());
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
