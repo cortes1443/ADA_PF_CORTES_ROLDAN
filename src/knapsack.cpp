@@ -8,7 +8,7 @@
 using namespace std;
 
 static inline void toWeightValue(const Solicitud& s, int &w, int &v) {
-    w = int(std::lround(s.totalCharges)); // peso: TotalCharges redondeado al entero más cercano
+    w = s.tenure; // peso: tenure (meses - valor pequeño)
     v = int(std::lround(s.monthlyCharges * 10.0)); // valor: MonthlyCharges * 10 redondeado (centavos)
     if (w < 0) w = 0;
     if (v < 0) v = 0;

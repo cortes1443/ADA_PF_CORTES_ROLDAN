@@ -150,6 +150,12 @@ int main() {
     //MODULO C
     cout << "\n===== MODULO C =====" << endl;
 
+    int count_churn_false = 0, count_churn_true = 0;
+    for (const auto &s : res.solicitudes) {
+        if (!s.churn) count_churn_false++;
+        else count_churn_true++;
+    }
+
     // Tomar las primeras 50 solicitudes activas (Churn == No) del arreglo ya ordenado por tenure
     std::vector<Solicitud> itemsC;
     for (const auto &s : res.solicitudes) {
@@ -158,7 +164,6 @@ int main() {
             if (itemsC.size() >= 50) break;
         }
     }
-
     int W = 500;
     KSResult ksres = solveKnapsackDP(itemsC, W);
     auto greedy = greedyByRatio(itemsC, W);
