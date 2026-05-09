@@ -73,6 +73,8 @@ int main() {
         "data/WA_Fn-UseC_-Telco-Customer-Churn.csv"
     );
 
+    vector<Solicitud> originalSolicitudes = res.solicitudes;
+
         cout << "Registros cargados: "
             << res.totalRegisters
             << endl;
@@ -100,7 +102,8 @@ int main() {
 
     cout << "CSV exportado." << endl;
 
-    benchmarkModuleA(res.solicitudes);
+    benchmarkModuleA(originalSolicitudes);
+
 
     //busquedas
     vector<int> queries = {72, 60, 45, 30, 12};
