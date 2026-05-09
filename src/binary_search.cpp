@@ -3,11 +3,11 @@
 using namespace std;
 
 int binarySearchFirstGE(const vector<Solicitud>& arr, int left, int right, int k) {
-    if (left > right) return -1;
+    if (left > right){ return -1;}
 
     int mid = left + (right - left) / 2;
 
-    if (arr[mid].tenure >= k) {
+    if (arr[mid].tenure == k) {
 
         int leftResult = binarySearchFirstGE(arr, left, mid - 1, k);
 
@@ -16,7 +16,11 @@ int binarySearchFirstGE(const vector<Solicitud>& arr, int left, int right, int k
 
         return mid;
     }
-    else {
-        return binarySearchFirstGE(arr, mid + 1, right, k);
+
+    if(arr[mid].tenure < k) {
+        return binarySearchFirstGE(arr, left, mid -1, k);
     }
+
+
+    return binarySearchFirstGE(arr, mid + 1, right, k);
 }
