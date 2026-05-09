@@ -13,53 +13,50 @@
 
 using namespace std;
 
-static void benchmarkModuleA(const vector<Solicitud>& solicitudesOrdenadas) {
+static void benchmarkModuleA(const vector<Solicitud>& solicitudes) {
+
     struct SampleCase {
         string label;
         size_t size;
     };
 
     const vector<SampleCase> cases = {
-        {"Pequeno", 100},
-        {"Mediano", 1000},
-        {"Grande", 5000},
+        {"1000", 1000},
+        {"3500", 3500},
+        {"7043", solicitudes.size()}
     };
-
-    ofstream timesOut("results/tiempos_modulo_A.txt");
-    timesOut << "Tamano de muestra,MergeSort_ms,BusquedaBinaria_ms\n";
-
-    const vector<int> queries = {72, 60, 45, 30, 12};
 
     cout << "\n===== TIEMPOS MODULO A =====" << endl;
 
+    constexpr int repetitions = 100;
+
     for (const auto& sampleCase : cases) {
-        size_t sampleSize = min(sampleCase.size, solicitudesOrdenadas.size());
-        vector<Solicitud> sample(solicitudesOrdenadas.begin(), solicitudesOrdenadas.begin() + sampleSize);
 
-        constexpr int repetitions = 100;
+        size_t sampleSize = min(sampleCase.size,solicitudes.size());
 
-        auto sortStart = chrono::steady_clock::now();
+        vector<Solicitud> sample(solicitudes.begin(), solicitudes.begin() + sampleSize);
+
+        auto start = chrono::steady_clock::now();
+
         for (int rep = 0; rep < repetitions; ++rep) {
+
             vector<Solicitud> temp = sample;
+
             mergeSort(temp, 0, temp.size() - 1);
         }
-        auto sortEnd = chrono::steady_clock::now();
 
-        auto searchStart = chrono::steady_clock::now();
-        for (int rep = 0; rep < repetitions; ++rep) {
-            for (int k : queries) {
-                (void)binarySearchFirstGE(sample, 0, sample.size() - 1, k);
-            }
-        }
-        auto searchEnd = chrono::steady_clock::now();
+        auto end = chrono::steady_clock::now();
 
-        double sortMs = chrono::duration<double, milli>(sortEnd - sortStart).count() / repetitions;
-        double searchMs = chrono::duration<double, milli>(searchEnd - searchStart).count() / repetitions;
+        double ms =
+            chrono::duration<double, milli>(
+                end - start
+            ).count() / repetitions;
 
-        cout << sampleCase.label << ": MergeSort=" << sortMs
-             << " ms, BusquedaBinaria=" << searchMs << " ms" << endl;
-
-        timesOut << sampleCase.label << "," << sortMs << "," << searchMs << "\n";
+        cout << sampleCase.label
+             << ": "
+             << ms
+             << " ms"
+             << endl;
     }
 
     timesOut.close();
