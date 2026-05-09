@@ -58,8 +58,6 @@ static void benchmarkModuleA(const vector<Solicitud>& solicitudes) {
              << " ms"
              << endl;
     }
-
-    timesOut.close();
 }
 
 int main() {
