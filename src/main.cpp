@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <chrono>
 
 #include "parser.hpp"
 #include "mergesort.hpp"
@@ -11,6 +12,58 @@
 #include "knapsack.hpp"
 
 using namespace std;
+
+static void benchmarkModuleA(const vector<Solicitud>& solicitudesOrdenadas) {
+    struct SampleCase {
+        string label;
+        size_t size;
+    };
+
+    const vector<SampleCase> cases = {
+        {"Pequeno", 100},
+        {"Mediano", 1000},
+        {"Grande", 5000},
+    };
+
+    ofstream timesOut("results/tiempos_modulo_A.txt");
+    timesOut << "Tamano de muestra,MergeSort_ms,BusquedaBinaria_ms\n";
+
+    const vector<int> queries = {72, 60, 45, 30, 12};
+
+    cout << "\n===== TIEMPOS MODULO A =====" << endl;
+
+    for (const auto& sampleCase : cases) {
+        size_t sampleSize = min(sampleCase.size, solicitudesOrdenadas.size());
+        vector<Solicitud> sample(solicitudesOrdenadas.begin(), solicitudesOrdenadas.begin() + sampleSize);
+
+        constexpr int repetitions = 100;
+
+        auto sortStart = chrono::steady_clock::now();
+        for (int rep = 0; rep < repetitions; ++rep) {
+            vector<Solicitud> temp = sample;
+            mergeSort(temp, 0, temp.size() - 1);
+        }
+        auto sortEnd = chrono::steady_clock::now();
+
+        auto searchStart = chrono::steady_clock::now();
+        for (int rep = 0; rep < repetitions; ++rep) {
+            for (int k : queries) {
+                (void)binarySearchFirstGE(sample, 0, sample.size() - 1, k);
+            }
+        }
+        auto searchEnd = chrono::steady_clock::now();
+
+        double sortMs = chrono::duration<double, milli>(sortEnd - sortStart).count() / repetitions;
+        double searchMs = chrono::duration<double, milli>(searchEnd - searchStart).count() / repetitions;
+
+        cout << sampleCase.label << ": MergeSort=" << sortMs
+             << " ms, BusquedaBinaria=" << searchMs << " ms" << endl;
+
+        timesOut << sampleCase.label << "," << sortMs << "," << searchMs << "\n";
+    }
+
+    timesOut.close();
+}
 
 int main() {
 
@@ -51,6 +104,8 @@ int main() {
     );
 
     cout << "CSV exportado." << endl;
+
+    benchmarkModuleA(res.solicitudes);
 
     //busquedas
     vector<int> queries = {72, 60, 45, 30, 12};
