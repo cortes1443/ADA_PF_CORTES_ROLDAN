@@ -1,0 +1,5 @@
+k = 72 -> No encontrado
+k = 60 -> No encontrado
+k = 45 -> No encontrado
+k = 30 -> No encontrado
+k = 12 -> 5248-YGIJN (tenure = 72)

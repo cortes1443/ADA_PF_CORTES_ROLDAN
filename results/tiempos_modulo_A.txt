@@ -1,0 +1,4 @@
+Tamano de muestra,MergeSort_ms,BusquedaBinaria_ms
+Pequeno,0.022536,5.8e-05
+Mediano,0.325811,7.9e-05
+Grande,1.57071,9.3e-05

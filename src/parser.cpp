@@ -2,8 +2,17 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
+#include <cctype>
 
 using namespace std;
+
+// Función auxiliar para remover espacios en blanco al inicio y final
+static inline string trim(string s) {
+    s.erase(s.begin(), find_if(s.begin(), s.end(), [](unsigned char ch) { return !isspace(ch); }));
+    s.erase(find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !isspace(ch); }).base(), s.end());
+    return s;
+}
 
 vector<string> split(const string& line) {
     vector<string> tokens;
@@ -11,7 +20,7 @@ vector<string> split(const string& line) {
     stringstream ss(line);
 
     while (getline(ss, token, ',')) {
-        tokens.push_back(token);
+        tokens.push_back(trim(token));
     }
 
     return tokens;
